@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export TOPDIR=$HOME/ODROID
+
+export PATH=$PATH:$TOPDIR/toolchain/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux/bin/
+export PATH=$PATH:$TOPDIR/toolchain/gcc-linaro-arm-none-eabi-4.8-2014.04_linux/bin
+
+
