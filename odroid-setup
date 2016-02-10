@@ -1,8 +1,51 @@
 #!/bin/bash
 
-export TOPDIR=$HOME/ODROID
+export SERVERIP=`hostname -I`
+#export BOARDIP=192.168.1.
 
-export PATH=$PATH:$TOPDIR/toolchain/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux/bin/
-export PATH=$PATH:$TOPDIR/toolchain/gcc-linaro-arm-none-eabi-4.8-2014.04_linux/bin
+# Uncomment when using a build server #
+#export USE_BUILD_SERVER=build.baylibre.com
+#export CROSS_COMPILE=arm-linux-gnueabihf-
 
+export CROSS_COMPILE=arm-linux-gnueabi-
+
+export COMMON=~/COMMON
+export TOPLEVEL=`pwd`
+
+# Try using a common local git clone for linux
+# As for CI will will usually checkout the tag-to-test
+#
+if [ -d "$COMMON/linux" ]
+then
+	echo "WARNING: will use the COMMON source for linux"
+        export KERNEL_SRC=$COMMON/linux
+else
+	export KERNEL_SRC=$TOPLEVEL/linux
+fi
+
+
+if [ -d "$COMMON/u-boot" ]
+then
+	echo "WARNING: will use the COMMON source for u-boot"
+        export UBOOT_SRC=$COMMON/u-boot
+else
+        export UBOOT_SRC=$TOPLEVEL/u-boot
+fi
+
+
+export TFTP_DIR=/var/lib/tftpboot
+
+export ARCH=arm
+
+#
+# Note on using NFS: this will work nicely if the
+# buildroot output/image dir is exported and used as scratch
+# nfs rootfs.
+#
+export INSTALL_MOD_PATH=$TOP_LEVEL/rootfs
+
+# Uncomment to experiment with IIO
+#
+#export PATH=$PATH:$TOPDIR/toolchain/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux/bin/
+#export PATH=$PATH:$TOPDIR/toolchain/gcc-linaro-arm-none-eabi-4.8-2014.04_linux/bin
 
