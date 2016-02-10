@@ -11,9 +11,17 @@ all: linux
 linux:	$(KERNEL_BUILD)/.config
 	make -C $(KERNEL_BUILD) LOADADDR=0x00208000 uImage dtbs
 
+images: linux
+	mkdir -p $(TFTP_DIR)
+	cp $(KERNEL_BUILD)/arch/arm/boot/dts/meson8b-odroidc1.dtb $(TFTP_DIR)
+	cp $(KERNEL_BUILD)/arch/arm/boot/*Image $(TFTP_DIR)
+
 $(KERNEL_BUILD)/.config:
 	mkdir -p $(KERNEL_BUILD)
 	make -C $(KERNEL_SRC) multi_v7_defconfig O=$(KERNEL_BUILD)
+
+uenv:
+	echo "dhcp" > uenv.tmpl
 
 uboot:
 	mkdir -p $(UBOOT_BUILD)
