@@ -16,6 +16,11 @@ images: linux
 	cp $(KERNEL_BUILD)/arch/arm/boot/dts/meson8b-odroidc1.dtb $(TFTP_DIR)
 	cp $(KERNEL_BUILD)/arch/arm/boot/*Image $(TFTP_DIR)
 
+.initramfs:
+	wget http://images.validation.linaro.org/functional-test-images/common/linaro-image-minimal-initramfs-genericarmv7a.cpio.gz.u-boot
+	mv linaro-image-minimal-initramfs-genericarmv7a.cpio.gz.u-boot $(TFTP_DIR)/initramfs.cpio.gz.u-boot
+	touch .initramfs
+
 $(KERNEL_BUILD)/.config:
 	mkdir -p $(KERNEL_BUILD)
 	make -C $(KERNEL_SRC) multi_v7_defconfig O=$(KERNEL_BUILD)
