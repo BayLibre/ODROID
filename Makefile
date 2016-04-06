@@ -2,36 +2,36 @@
 UBOOT_BUILD?=$(TOPLEVEL)/build/u-boot
 KERNEL_BUILD?=$(TOPLEVEL)/build/linux
 
-all: linux
+all: kernel uboot
 
 #toolchain:
-#	mkdir -p $(TOPDIR)/toolchain
-#	cd $(TOPDIR)/toolchain && wget $(TOOLCHAIN_URL)
+#	mkdir -p toolchain
+#	cd toolchain && wget $(TOOLCHAIN_URL)
 #	cd $(TOPDIR)/toolchain && tar xJvf gcc-linaro-arm-none-eabi-4.8-2014.04_linux.tar.xz
-linux:	$(KERNEL_BUILD)/.config
-	make -C $(KERNEL_BUILD) LOADADDR=0x00208000 uImage dtbs
 
-images: linux
-	mkdir -p $(TFTP_DIR)
-	cp $(KERNEL_BUILD)/arch/arm/boot/dts/meson8b-odroidc1.dtb $(TFTP_DIR)
-	cp $(KERNEL_BUILD)/arch/arm/boot/*Image $(TFTP_DIR)
+linux:
+	git clone --depth 1 https://github.com/hardkernel/linux.git -b odroidc-3.10.y-android
 
-.initramfs:
-	wget http://images.validation.linaro.org/functional-test-images/common/linaro-image-minimal-initramfs-genericarmv7a.cpio.gz.u-boot
-	mv linaro-image-minimal-initramfs-genericarmv7a.cpio.gz.u-boot $(TFTP_DIR)/initramfs.cpio.gz.u-boot
-	touch .initramfs
+kernel: linux
+	cd linux && make odroidc_defconfig
+	make -C linux uImage -j 5
+	make -C linux modules modules_install
 
-$(KERNEL_BUILD)/.config:
-	mkdir -p $(KERNEL_BUILD)
-	make -C $(KERNEL_SRC) multi_v7_defconfig O=$(KERNEL_BUILD)
 
-uenv:
-	echo "dhcp" > uenv.tmpl
+### UBOOT ##
 
-uboot:
-	mkdir -p $(UBOOT_BUILD)
-	make -C $(UBOOT_SRC) odroidc_config O=$(UBOOT_BUILD)
-	make -C $(UBOOT_BUILD) -j 5
+u-boot:
+	git clone https://github.com/hardkernel/u-boot.git -b odroidc-v2011.03
+
+uboot: u-boot linux
+	make -C $(UBOOT_SRC) odroidc_config
+	make -C $(UBOOT_SRC) -j 5
+	make -C u-boot tools
+# fixup hardkernel crap
+	cp u-boot/build/tools/mkimage linux/arch/arm/boot/mkimage
+	echo "cd sd_fuse && ./sd_fusing.sh <device/path/of/your/card>"
 
 clean:
+	make -C u-boot clean
+	make -C linux mrproper
 
